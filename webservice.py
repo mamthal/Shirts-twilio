@@ -26,16 +26,15 @@ def quote():
         data = message_body.split(';')
         for line in data:
             if re.search('TYPE', line) is not None:
-                if re.search('(G500)',line) is not None:
-                    if re.search('White',line) is not None:
-                        type = 1
-                    else:
-                        type = 3
-                elif re.search('(2001)',line) is not None:
+                if re.search('White T-Shirt \(G500\)',line) is not None:
+                    type = 1
+                elif re.search('Colored T-Shirt \(G500\)',line) is not None:
+                    type = 3
+                elif re.search('American Apparel T-Shirt \(2001\)',line) is not None:
                     type = 31
-                elif re.search('(G180)',line) is not None:
+                elif re.search('Sweatshirt \(G180\)',line) is not None:
                     type = 5
-                elif re.search('(G950)',line) is not None:
+                elif re.search('Hoodie \(G950\)',line) is not None:
                     type = 7
                 else:
                     #User has provided a garment type that we cannot handle
