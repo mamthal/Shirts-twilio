@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET','POST'])
 def quote():
-    type = None
+    shirt_type = None
     quantity = None
     print_type = None
     resp = twilio.twiml.Response()
@@ -27,18 +27,18 @@ def quote():
         for line in data:
             if re.search('TYPE', line) is not None:
                 if re.search('White T-Shirt \(G500\)',line) is not None:
-                    type = 1
+                    shirt_type = 1
                 elif re.search('Colored T-Shirt \(G500\)',line) is not None:
-                    type = 3
+                    shirt_type = 3
                 elif re.search('American Apparel T-Shirt \(2001\)',line) is not None:
-                    type = 31
+                    shirt_type = 31
                 elif re.search('Sweatshirt \(G180\)',line) is not None:
-                    type = 5
+                    shirt_type = 5
                 elif re.search('Hoodie \(G950\)',line) is not None:
-                    type = 7
+                    shirt_type = 7
                 else:
                     #User has provided a garment type that we cannot handle
-                    resp.message("Invalid type. Please choose a type from\n White T-Shirt (G500)\n Colored T-Shirt (G500)\n American Apparel T-Shirt (2001)\n Sweatshirt (G180)\n Hoodie (G950).\n Please try again with NEW QUOTE.")
+                    resp.message("Invalid shirt type. Please choose a type from\n White T-Shirt (G500)\n Colored T-Shirt (G500)\n American Apparel T-Shirt (2001)\n Sweatshirt (G180)\n Hoodie (G950).\n Please try again with NEW QUOTE.")
                     return str(resp)
             elif re.search("QTY", line) is not None:
                 tag, quantity = line.split(':')
@@ -51,22 +51,10 @@ def quote():
         if quantity is None:
             resp.message("Please specify the number of shirts for the quote.")
             return str(resp)
-        quote_str = "https://www.shirts.io/api/v1/quote/"
-        quote_str = quote_str + "?api_key="+shirts_auth_token
-        quote_str = quote_str + "&test=True"
         if print_type is None:
-            quote_str = quote_str + "&print_type=Screenprint" #We use Screenprint as default
-        else:
-            quote_str = quote_str + "&print_type=" + print_type
-        quote_str = quote_str + "&garment[0][product_id]=" + str(type)
-        quote_str = quote_str + "&garment[0][color]=White" #default color
-        quote_str = quote_str + "&garment[0][sizes][med]=" + quantity 
-        #We use the medium as the default size and assume all shirts as medium for the purpose of this quote. We can make this more accurate in future
-        quote_str = quote_str + "&print[front][color_count]=1" #Use 1 as default color count
-        quote_str = quote_str + "&print[back][color_count]=1" #Use 1 as default color count
-        quote_str = quote_str + "&print[back][colors][0]=101c" #Using 101c as default color
-        quote_str = quote_str + "&address_count=1" #We use 1 as default
-        quote_str = quote_str + "&international_garments[CA]=1" #Using CA by default
+            print_type = 'Screenprint'
+        quote_str = "https://www.shirts.io/api/v1/quote/?api_key=%s&test=True&print_type=%s&garment[0][product_id]=%d" % (shirts_auth_token,print_type,shirt_type)
+        quote_str = quote_str + "&garment[0][color]=White&garment[0][sizes][med]=%s&print[front][color_count]=1" % (quantity)
 
     print quote_str
     shirts_resp = requests.get(quote_str)
